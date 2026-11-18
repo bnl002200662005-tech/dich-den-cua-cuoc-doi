@@ -3970,6 +3970,828 @@
 
             <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-3">
               <div>
+    function renderGiftScreen() {
+      const score = state.satisfactionScore;
+      const tier = getRatingMilestone(score);
+      const fallbackSlot = STICKER_SLOTS.find(s => s.id === tier.stickerFallbackId);
+      const fallbackUrl = fallbackSlot ? getImage(fallbackSlot.id, fallbackSlot.defaultImg) : tier.defaultImg;
+      const tierImg = getImage(tier.id, fallbackUrl);
+
+      const disc1Cover = getImage(
+        "gift_disc1_cover",
+        "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=500&q=80"
+      );
+      const box2Cover = getImage(
+        "gift_box2_cover",
+        "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=500&q=80"
+      );
+
+      const reactionVisual = state.giftQuestionAnswer
+        ? getQuestionReactionVisual(state.giftQuestionStickerKey, state.giftQuestionSentiment)
+        : null;
+      const reactionImg = reactionVisual ? getImage(reactionVisual.slotKey, reactionVisual.fallback) : "";
+
+      return `
+        ${renderTopNav()}
+        <main class="flex-1 px-4 py-4 space-y-4 animate-fade-up">
+          <div class="bg-white rounded-[32px] p-5 sm:p-6 card-shadow border border-[#F3E1E7] space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <button type="button" onclick="navigateTo('quote_7')" class="px-3 py-1.5 rounded-full bg-[#FDF2F5] border border-[#EED6DE] text-[11px] font-extrabold text-[#6E545D] hover:border-[#E14B75] transition-all">
+                ← Quay lại trang trước
+              </button>
+              <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FCEEF2] text-[#BE3159] text-xs font-extrabold">
+                <span>🎁</span>
+                <span>Hộp Quà Bí Mật Dành Riêng Cho Thy</span>
+              </div>
+            </div>
+
+            <div class="text-center space-y-1.5">
+              <h2 class="font-serif-title text-3xl font-bold text-[#2D2226] leading-tight">
+                Chạm từng bước để mở khóa món quà cuối hành trình ✨
+              </h2>
+              <p class="text-xs text-[#6B5A60] leading-relaxed">
+                Gồm 3 nấc cảm xúc nối tiếp nhau — người đẹp cứ mở lần lượt từ trên xuống dưới nhé!
+              </p>
+            </div>
+
+            <!-- NẤC 1: ĐĨA NHẠC NGƯỜI ANH YÊU NHẤT -->
+            <div id="gift-step-1" class="p-4 rounded-3xl bg-gradient-to-br from-[#FFF6F9] to-[#FCEEF2] border border-[#F4C8D5] space-y-3">
+              <div class="p-3 rounded-2xl bg-white/85 border border-[#F3D8E0] text-xs text-[#4A3B40] italic leading-relaxed">
+                “E hèm, đi đến đây là cũng biết được kha khá những điều thú vị, tâm tư rồi à nha. Có tò mò rằng anh xem em là gì không? 🤭😊 Vậy thử click vào đĩa nhạc này đi.”
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#BE3159]">Nấc 01 • Giai điệu mở đầu</span>
+                <span class="text-[11px] font-bold text-[#7A686E]">${state.giftDisc1Open ? "Đã mở khóa ✨" : "Chạm đĩa để mở"}</span>
+              </div>
+
+              <button type="button" onclick="toggleGiftDisc1()" class="w-full flex items-center gap-3.5 text-left">
+                ${
+                  state.giftDisc1Open
+                    ? `<div class="w-20 h-20 rounded-full overflow-hidden shadow-md shrink-0 relative border-2 border-[#E14B75] animate-spin-disc">
+                        <img src="${disc1Cover}" alt="Người Anh Yêu Nhất" class="w-full h-full object-cover" />
+                        <span class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <span class="w-4 h-4 rounded-full bg-white/95 border-2 border-[#E14B75] shadow-inner"></span>
+                        </span>
+                      </div>`
+                    : `<div class="w-20 h-20 rounded-full bg-gradient-to-tr from-[#2D2226] via-[#59434B] to-[#E14B75] flex items-center justify-center text-white shadow-md shrink-0 relative">
+                        <span class="text-2xl">💿</span>
+                        <span class="w-4 h-4 rounded-full bg-white absolute"></span>
+                      </div>`
+                }
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-extrabold text-[#2D2226]">
+                    ${state.giftDisc1Open ? "🎵 Người Anh Yêu Nhất — Đinh Đại Vũ" : "Đĩa nhạc bí mật #1"}
+                  </div>
+                  <div class="text-xs text-[#6E545D] mt-0.5">
+                    ${state.giftDisc1Open ? "Giai điệu thay lời muốn nói đầu tiên gửi tới Thy..." : "Chạm vào đĩa nhạc để lắng nghe ca khúc đầu tiên"}
+                  </div>
+                </div>
+              </button>
+
+              ${
+                state.giftDisc1Open
+                  ? `
+                <div class="pt-2 border-t border-[#F2D3DD] flex flex-wrap items-center gap-2 animate-fade-up">
+                  <button type="button" onclick="toggleSongPreview('gift_nguoianhyeunhat', 'Người Anh Yêu Nhất', 'Đinh Đại Vũ')" class="px-3 py-1.5 rounded-xl bg-[#E14B75] text-white text-[11px] font-bold">
+                    ${playingSongId === "gift_nguoianhyeunhat" ? "⏹️ Dừng demo" : "▶️ Nghe piano phối lại"}
+                  </button>
+                  <a href="https://www.youtube.com/results?search_query=Ng%C6%B0%E1%BB%9Di+Anh+Y%C3%AAu+Nh%E1%BA%A5t+-+%C4%90inh+%C4%90%E1%BA%A1i+V%C5%A9" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-white border border-[#FECDD3] text-[#E11D48] text-[11px] font-bold">
+                    🎬 Mở trọn bài trên YouTube
+                  </a>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+
+            <!-- NẤC 2: HỘP QUÀ CÓ CHẮC YÊU LÀ ĐÂY -->
+            <div id="gift-step-2" class="p-4 rounded-3xl ${state.giftDisc1Open ? "bg-gradient-to-br from-[#FFF9F2] to-[#FCEEE5] border border-[#F3D7C3]" : "bg-[#F9F6F7] border border-[#ECE2E5] opacity-75"} space-y-3 transition-all">
+              <div class="p-3 rounded-2xl bg-white/90 border border-[#F3D7C3] text-xs text-[#4A3B40] italic leading-relaxed">
+                “Hơi sến súa chút hehe, đừng có mà cười anh he. Vì trong anh giờ đây đang không rõ :”
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#B45309]">Nấc 02 • Hộp quà tiếp nối</span>
+                <span class="text-[11px] font-bold text-[#7A686E]">${state.giftBox2Open ? "Đã mở khóa ✨" : state.giftDisc1Open ? "Chạm hộp quà để mở" : "Mở Nấc 01 trước"}</span>
+              </div>
+
+              <button type="button" onclick="toggleGiftBox2()" class="w-full flex items-center gap-3.5 text-left">
+                ${
+                  state.giftBox2Open
+                    ? `<div class="w-20 h-20 rounded-2xl overflow-hidden shadow-md shrink-0 border-2 border-[#F59E0B] animate-gift-float bg-white">
+                        <img src="${box2Cover}" alt="Có Chắc Yêu Là Đây" class="w-full h-full object-cover" />
+                      </div>`
+                    : `<div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#F59E0B] to-[#FBBF24] flex items-center justify-center text-white shadow-md shrink-0">
+                        <span class="text-3xl">🎁</span>
+                      </div>`
+                }
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-extrabold text-[#2D2226]">
+                    ${state.giftBox2Open ? "🎶 Có Chắc Yêu Là Đây — Sơn Tùng M-TP" : "Hộp quà bí mật #2"}
+                  </div>
+                  <div class="text-xs text-[#6E545D] mt-0.5">
+                    ${state.giftBox2Open ? "Một chút rung động ngọt ngào gửi đến người đẹp..." : "Chạm vào hộp quà để khám phá bất ngờ thứ hai"}
+                  </div>
+                </div>
+              </button>
+
+              ${
+                state.giftBox2Open
+                  ? `
+                <div class="pt-2 border-t border-[#F0D5C2] flex flex-wrap items-center gap-2 animate-fade-up">
+                  <button type="button" onclick="toggleSongPreview('gift_cochacyeuladay', 'Có Chắc Yêu Là Đây', 'Sơn Tùng M-TP')" class="px-3 py-1.5 rounded-xl bg-[#D97706] text-white text-[11px] font-bold">
+                    ${playingSongId === "gift_cochacyeuladay" ? "⏹️ Dừng demo" : "▶️ Nghe demo"}
+                  </button>
+                  <a href="https://www.youtube.com/results?search_query=C%C3%B3+Ch%E1%BA%AFc+Y%C3%AAu+L%C3%A0+%C4%90%C3%A2y+-+S%C6%A1n+T%C3%B9ng+M-TP" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-white border border-[#FDE68A] text-[#B45309] text-[11px] font-bold">
+                    🎬 Mở trọn bài trên YouTube
+                  </a>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+
+            <!-- NẤC 3: HỘP QUÀ DẤU ? (YÊU ĐƯỢC KHÔNG - ĐỨC PHÚC + 27 STICKER ĐỘNG) -->
+            <div id="gift-step-3" class="p-4 rounded-3xl ${state.giftBox2Open ? "bg-gradient-to-br from-[#FFF1F5] via-[#FCE7F3] to-[#FDF2F8] border-2 border-dashed border-[#F472B6]" : "bg-[#F9F6F7] border-2 border-dashed border-[#E5CED6] opacity-80"} space-y-3 transition-all">
+              <div class="text-center">
+                <span class="inline-block px-3.5 py-1.5 rounded-2xl bg-white/95 border border-[#F9A8D4] text-xs sm:text-sm text-[#BE185D] font-extrabold italic shadow-xs">
+                  “Và anh có một câu hỏi?”
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#BE185D]">Nấc 03 • Bí mật cuối cùng</span>
+                <span class="text-[11px] font-bold text-[#9D174D]">${state.giftQuestionAnswer ? "Thy đã hồi âm 💌" : state.giftBox2Open ? "Chạm hộp ? để mở" : "Mở Nấc 02 trước"}</span>
+              </div>
+
+              <button type="button" onclick="openGiftQuestionModal()" class="w-full flex items-center gap-3.5 text-left">
+                ${
+                  state.giftQuestionAnswer && reactionVisual
+                    ? `<div class="w-16 h-16 rounded-2xl overflow-hidden bg-white border-2 ${reactionVisual.borderClass} shadow-md shrink-0 animate-reaction-pop">
+                        <img src="${reactionImg}" alt="${reactionVisual.badge}" class="w-full h-full object-cover" />
+                      </div>`
+                    : `<div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#E14B75] to-[#EC4899] flex items-center justify-center text-white shadow-md shrink-0">
+                        <span class="text-3xl font-extrabold">❓</span>
+                      </div>`
+                }
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-extrabold text-[#2D2226]">
+                    Hộp quà dấu ? đặc biệt
+                  </div>
+                  <div class="text-xs text-[#6E545D] mt-0.5">
+                    ${state.giftQuestionAnswer ? "Chạm lại nếu Thy muốn đổi câu trả lời khác" : "Chạm vào chiếc hộp dấu ? để xem thông báo bí mật"}
+                  </div>
+                </div>
+              </button>
+
+              ${
+                state.giftQuestionAnswer && reactionVisual
+                  ? `
+                <div class="p-4 rounded-2xl bg-white border border-[#F9A8D4] text-center space-y-2.5 animate-fade-up shadow-sm">
+                  <div class="w-28 h-28 mx-auto rounded-3xl overflow-hidden bg-[#FFF5F8] border-2 ${reactionVisual.borderClass} shadow-md animate-reaction-pop">
+                    <img src="${reactionImg}" alt="${reactionVisual.badge}" class="w-full h-full object-cover" />
+                  </div>
+                  <div class="inline-block px-3 py-1 rounded-full bg-[#FCEEF2] text-[#BE3159] text-[11px] font-extrabold">
+                    ${reactionVisual.badge}
+                  </div>
+                  <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#BE185D]">
+                    💌 HỒI ĐÁP CỦA THY DÀNH CHO CÂU HỎI “YÊU ĐƯỢC KHÔNG?”:
+                  </div>
+                  <div class="text-sm font-extrabold text-[#2D2226]">
+                    “${state.giftQuestionAnswer}”
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+
+          <!-- ĐÁNH GIÁ MỨC ĐỘ HÀI LÒNG 0% - 100% + STICKER THEO MỐC ĐIỂM -->
+          <div class="bg-white rounded-[32px] p-5 sm:p-6 card-shadow border border-[#F3E1E7] space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm sm:text-base font-extrabold text-[#2D2226]">
+                  📊 Thy chấm cho góc nhỏ này bao nhiêu % hài lòng?
+                </h3>
+                <p class="text-[11px] text-[#7A686E]">Kéo thanh trượt từ 0% đến 100% để xem phản ứng tương ứng nha</p>
+              </div>
+              <span id="rating-score-badge" class="px-3 py-1 rounded-full bg-[#FCEEF2] text-[#BE3159] text-sm font-extrabold">
+                ${score}%
+              </span>
+            </div>
+
+            <div class="relative py-3 custom-slider-track">
+              <div class="h-3 w-full rounded-full bg-[#F5E1E8] overflow-hidden pointer-events-none">
+                <div id="rating-fill-bar" class="h-full bg-gradient-to-r from-[#F472B6] to-[#E14B75]" style="width: ${score}%;"></div>
+              </div>
+              <div id="rating-thumb-knob" class="w-6 h-6 rounded-full bg-white border-4 border-[#E14B75] shadow-md absolute top-1/2 -translate-y-1/2 pointer-events-none" style="left: calc(${score}% - 12px);"></div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value="${score}"
+                oninput="updateSatisfactionScore(this.value)"
+                onchange="updateSatisfactionScore(this.value)"
+                aria-label="Mức độ hài lòng từ 0 đến 100 phần trăm"
+                class="rating-range-overlay"
+              />
+            </div>
+
+            <div id="rating-meme-box" data-tier-id="${tier.id}" class="p-3.5 rounded-2xl bg-[#FFF7FA] border border-[#F3D8E0] flex items-center gap-3.5 transition-all">
+              <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white border border-[#F4C8D5] shrink-0 shadow-sm">
+                <img id="rating-meme-img" src="${tierImg}" alt="${tier.shortTitle}" class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0 space-y-1">
+                <div id="rating-meme-title" class="text-xs font-extrabold text-[#BE3159]">
+                  ${tier.shortTitle}
+                </div>
+                <p id="rating-meme-reply" class="text-xs text-[#3B2D32] leading-relaxed">
+                  ${tier.reply}
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-[#2D2226]">
+                💬 Lời nhắn thêm hoặc góp ý của Thy dành cho Long:
+              </label>
+              <textarea
+                rows="3"
+                oninput="updateSatisfactionFeedback(this.value)"
+                placeholder="Thy cứ viết thoải mái cảm nhận thật lòng sau khi đi hết 7 chặng nhé..."
+                class="w-full p-3.5 rounded-2xl bg-[#FDF9FA] border border-[#E7CFD7] text-xs text-[#2D2226] focus:outline-none focus:border-[#E14B75]"
+              >${state.satisfactionFeedback}</textarea>
+            </div>
+
+            <button type="button" onclick="completeAndSendWithVoucher()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#E14B75] to-[#C8355E] text-white text-xs sm:text-sm font-extrabold shadow-lg active:scale-98 transition-transform">
+              💌 Hoàn thành & Gửi kết quả về cho Long
+            </button>
+
+            ${
+              state.emailSentStatus
+                ? `<div class="p-3 rounded-2xl bg-[#F3FAF6] border border-[#CFEAD9] text-[11px] font-semibold text-[#1E603F] leading-relaxed">
+                    ${state.emailSentStatus}
+                  </div>`
+                : ""
+            }
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="openRandomVoucherPopup()" class="py-3.5 px-3 rounded-2xl bg-gradient-to-r from-[#FFF7ED] to-[#FEF3C7] border border-[#FCD34D] text-[#B45309] text-xs font-extrabold shadow-sm active:scale-98 transition-transform flex items-center justify-center gap-1.5">
+              <span>🎟️</span>
+              <span>${state.wonVoucherId ? "Mở lại vé quà của Thy" : "Rút thẻ quà bất ngờ"}</span>
+            </button>
+            <button type="button" onclick="navigateTo('quotes_vault')" class="py-3.5 px-3 rounded-2xl bg-white border border-[#EED6DE] text-[#BE3159] text-xs font-extrabold shadow-sm active:scale-98 transition-transform flex items-center justify-center gap-1.5">
+              <span>📜</span>
+              <span>Kho 58 châm ngôn</span>
+            </button>
+          </div>
+        </main>
+      `;
+    }
+
+    // =========================================================================
+    // 8. VOUCHER NGẪU NHIÊN BUNG HOA BUNG TIM & KHO 58 MẢNH CHÂM NGÔN
+    // =========================================================================
+    function launchCelebrationBurst() {
+      const icons = ["🌸", "💖", "✨", "🎉", "🌷", "💐", "🥳", "💕"];
+      for (let i = 0; i < 24; i++) {
+        setTimeout(() => {
+          const el = document.createElement("span");
+          el.className = "fx-particle";
+          el.textContent = icons[i % icons.length];
+          el.style.fontSize = `${18 + Math.random() * 14}px`;
+          const startX = window.innerWidth * (0.15 + Math.random() * 0.7);
+          const startY = window.innerHeight * (0.35 + Math.random() * 0.35);
+          const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.9;
+          const dist = 80 + Math.random() * 120;
+          el.style.left = `${startX}px`;
+          el.style.top = `${startY}px`;
+          el.style.setProperty("--tx", `${Math.cos(angle) * dist}px`);
+          el.style.setProperty("--ty", `${Math.sin(angle) * dist}px`);
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 950);
+        }, i * 32);
+      }
+    }
+
+    function applyVoucherToModal(voucher) {
+      const emojiEl = document.getElementById("voucher-emoji");
+      const codeEl = document.getElementById("voucher-code-badge");
+      const titleEl = document.getElementById("voucher-title");
+      const descEl = document.getElementById("voucher-desc");
+      if (emojiEl) emojiEl.textContent = voucher.emoji;
+      if (codeEl) codeEl.textContent = `MÃ: ${voucher.code}`;
+      if (titleEl) titleEl.textContent = voucher.title;
+      if (descEl) descEl.textContent = voucher.desc;
+    }
+
+    function openRandomVoucherPopup() {
+      let chosen = SURPRISE_VOUCHERS.find(v => v.id === state.wonVoucherId);
+      if (!chosen) {
+        chosen = SURPRISE_VOUCHERS[Math.floor(Math.random() * SURPRISE_VOUCHERS.length)];
+        state.wonVoucherId = chosen.id;
+        saveState();
+      }
+      applyVoucherToModal(chosen);
+      const modal = document.getElementById("voucher-popup-modal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+      launchCelebrationBurst();
+      return chosen;
+    }
+
+    function completeAndSendWithVoucher() {
+      const chosenVoucher = openRandomVoucherPopup();
+      if (chosenVoucher && typeof state.satisfactionFeedback === "string") {
+        const tag = `[🎟️ Voucher Thy nhận được: ${chosenVoucher.code} - ${chosenVoucher.title}]`;
+        if (!state.satisfactionFeedback.includes(chosenVoucher.code)) {
+          state.satisfactionFeedback = state.satisfactionFeedback.trim()
+            ? `${state.satisfactionFeedback.trim()}\n\n${tag}`
+            : tag;
+          saveState();
+        }
+      }
+      if (typeof sendResultToLongEmail === "function") {
+        sendResultToLongEmail();
+      }
+      setTimeout(() => openRandomVoucherPopup(), 120);
+    }
+
+    function closeVoucherModal() {
+      const modal = document.getElementById("voucher-popup-modal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+      launchCelebrationBurst();
+      render();
+    }
+
+    const QUOTE_TOPICS_META = [
+      { id: "all", label: "Tất cả (58)", range: [0, 57] },
+      { id: "morning", label: "☀️ Bình yên", range: [0, 9] },
+      { id: "soul", label: "🎶 Cảm xúc", range: [10, 19] },
+      { id: "warmth", label: "🍜 Ấm áp", range: [20, 29] },
+      { id: "charm", label: "🌸 Dịu dàng", range: [30, 39] },
+      { id: "bond", label: "💖 Đồng điệu", range: [40, 57] }
+    ];
+
+    function setQuotesFilter(topicId) {
+      state.quotesFilterTopic = topicId;
+      saveState();
+      render();
+    }
+
+    function drawDailySoulQuote() {
+      const randomIdx = Math.floor(Math.random() * ALL_58_QUOTES.length);
+      state.dailyDrawnQuoteIndex = randomIdx;
+      saveState();
+      render();
+      launchCelebrationBurst();
+    }
+
+    function toggleSaveQuote(idx) {
+      const list = state.savedQuoteIndices || [];
+      if (list.includes(idx)) {
+        state.savedQuoteIndices = list.filter(i => i !== idx);
+      } else {
+        state.savedQuoteIndices = [...list, idx];
+      }
+      saveState();
+      render();
+    }
+
+    function copyQuoteToClipboard(idx, btnEl) {
+      const text = `“${ALL_58_QUOTES[idx]}” — Một chút giản đơn 🌿`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => {});
+      }
+      if (btnEl) {
+        const old = btnEl.textContent;
+        btnEl.textContent = "✓ Đã chép";
+        setTimeout(() => {
+          btnEl.textContent = old;
+        }, 1400);
+      }
+    }
+
+    function renderQuotesVaultScreen() {
+      const curTopic = QUOTE_TOPICS_META.find(t => t.id === state.quotesFilterTopic) || QUOTE_TOPICS_META[0];
+      const savedList = state.savedQuoteIndices || [];
+      const drawnIdx = state.dailyDrawnQuoteIndex;
+
+      const filteredIndices = [];
+      for (let i = 0; i < ALL_58_QUOTES.length; i++) {
+        if (curTopic.id === "saved") {
+          if (savedList.includes(i)) filteredIndices.push(i);
+        } else if (i >= curTopic.range[0] && i <= curTopic.range[1]) {
+          filteredIndices.push(i);
+        }
+      }
+
+      return `
+        ${renderTopNav()}
+        <main class="flex-1 px-4 py-4 space-y-4 animate-fade-up">
+          <div class="bg-white rounded-[32px] p-5 sm:p-6 card-shadow border border-[#F3E1E7] space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <button type="button" onclick="navigateTo('gift')" class="px-3 py-1.5 rounded-full bg-[#FDF2F5] border border-[#EED6DE] text-[11px] font-extrabold text-[#6E545D] hover:border-[#E14B75] transition-all">
+                ← Quay lại Hộp Quà
+              </button>
+              <span class="px-3 py-1 rounded-full bg-[#FCEEF2] text-[#BE3159] text-[11px] font-extrabold">
+                Đã thả tim ${savedList.length}/58
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h2 class="font-serif-title text-3xl font-bold text-[#2D2226]">
+                Kho 58 Mảnh Châm Ngôn 🌿
+              </h2>
+              <p class="text-xs text-[#6B5A60] leading-relaxed">
+                58 lời nhắn dịu dàng dành cho tâm hồn Thy — người đẹp có thể rút một thông điệp ngẫu nhiên mỗi ngày hoặc lưu lại những câu chạm tim nhất!
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-[#FFF6F9] to-[#FAF4F0] border border-[#F2DCE3] space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#BE3159]">
+                  ✨ Thông điệp ngẫu nhiên hôm nay
+                </span>
+                <button type="button" onclick="drawDailySoulQuote()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#E14B75] to-[#C8355E] text-white text-[11px] font-extrabold shadow-sm active:scale-95 transition-transform">
+                  🎲 Rút 1 câu mới
+                </button>
+              </div>
+              ${
+                drawnIdx !== null && ALL_58_QUOTES[drawnIdx]
+                  ? `<div class="p-3.5 rounded-xl bg-white border border-[#F4C8D5] space-y-2 animate-fade-up">
+                      <p class="font-serif-title italic text-lg font-semibold text-[#2D2226] leading-relaxed">
+                        “${ALL_58_QUOTES[drawnIdx]}”
+                      </p>
+                      <div class="flex items-center justify-between text-[10px] font-bold text-[#9E7B86]">
+                        <span>Mảnh ghép #${drawnIdx + 1} / 58</span>
+                        <button type="button" onclick="toggleSaveQuote(${drawnIdx})" class="text-[#BE3159]">
+                          ${savedList.includes(drawnIdx) ? "💖 Đã lưu yêu thích" : "🤍 Lưu câu này"}
+                        </button>
+                      </div>
+                    </div>`
+                  : `<p class="text-xs text-[#7A686E] italic">
+                      Chạm nút “Rút 1 câu mới” để nhận một lời nhắn dịu dàng dành riêng cho khoảnh khắc này của Thy nhé!
+                    </p>`
+              }
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${QUOTE_TOPICS_META.map(
+                t => `
+                <button type="button" onclick="setQuotesFilter('${t.id}')" class="px-2.5 py-1.5 rounded-full text-[11px] font-extrabold transition-all ${
+                  state.quotesFilterTopic === t.id
+                    ? "bg-[#E14B75] text-white shadow-sm"
+                    : "bg-[#FDF2F5] text-[#6E545D] border border-[#EED6DE]"
+                }">
+                  ${t.label}
+                </button>
+              `
+              ).join("")}
+              <button type="button" onclick="setQuotesFilter('saved')" class="px-2.5 py-1.5 rounded-full text-[11px] font-extrabold transition-all ${
+                state.quotesFilterTopic === "saved"
+                  ? "bg-[#E14B75] text-white shadow-sm"
+                  : "bg-[#FFF7ED] text-[#B45309] border border-[#FDE68A]"
+              }">
+                💖 Đã lưu (${savedList.length})
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            ${
+              filteredIndices.length === 0
+                ? `<div class="bg-white rounded-3xl p-6 text-center card-shadow border border-[#F3E1E7] text-xs text-[#7A686E]">
+                    Thy chưa thả tim lưu câu châm ngôn nào — chạm biểu tượng 💖 ở bất kỳ câu nào bên dưới để lưu lại nhé!
+                  </div>`
+                : filteredIndices
+                    .map(idx => {
+                      const isSaved = savedList.includes(idx);
+                      return `
+                        <div class="bg-white rounded-2xl p-4 card-shadow border ${isSaved ? "border-[#F472B6] bg-[#FFF9FB]" : "border-[#F3E1E7]"} space-y-2 transition-all">
+                          <div class="flex items-center justify-between gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-[#FCEEF2] text-[#BE3159] text-[10px] font-extrabold">
+                              #${idx + 1} / 58
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                              <button type="button" onclick="copyQuoteToClipboard(${idx}, this)" class="px-2.5 py-1 rounded-lg bg-[#FDF8F6] border border-[#EED9E0] text-[10px] font-bold text-[#6E545D]">
+                                📋 Chép
+                              </button>
+                              <button type="button" onclick="toggleSaveQuote(${idx})" class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold ${
+                                isSaved
+                                  ? "bg-[#E14B75] text-white"
+                                  : "bg-[#FCEEF2] text-[#BE3159]"
+                              }">
+                                ${isSaved ? "💖 Đã lưu" : "🤍 Lưu"}
+                              </button>
+                            </div>
+                          </div>
+                          <p class="font-serif-title italic text-base sm:text-lg font-semibold text-[#2D2226] leading-relaxed">
+                            “${ALL_58_QUOTES[idx]}”
+                          </p>
+                        </div>
+                      `;
+                    })
+                    .join("")
+            }
+          </div>
+        </main>
+      `;
+    }
+
+    // =========================================================================
+    // 9. GÓC CỦA LONG (QUẢN LÝ STICKERS, ẢNH LỰA CHỌN, EMAIL & ĐÓNG GÓI FILE)
+    // =========================================================================
+    function handleUploadSlotImage(slotKey, inputEl) {
+      const file = inputEl && inputEl.files && inputEl.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        const rawDataUrl = e.target.result;
+        const compressedUrl = await compressImageDataUrl(rawDataUrl, 720, 0.82);
+        if (!state.customImages) state.customImages = {};
+        state.customImages[slotKey] = compressedUrl;
+        await saveImageToDB(slotKey, compressedUrl);
+        saveState();
+        render();
+        showAdminSavedToast("✅ Đã lưu ảnh vào trình duyệt! Nhớ bấm Xuất file HTML khi muốn gửi Thy nha.");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateSlotImageUrl(slotKey, rawUrl) {
+      const trimmed = (rawUrl || "").trim();
+      if (!state.customImages) state.customImages = {};
+      if (!trimmed) {
+        delete state.customImages[slotKey];
+        removeImageFromDB(slotKey);
+      } else {
+        state.customImages[slotKey] = trimmed;
+        saveImageToDB(slotKey, trimmed);
+      }
+      saveState();
+      render();
+      showAdminSavedToast("✅ Đã gắn link ảnh thành công!");
+    }
+
+    function clearSlotImage(slotKey) {
+      if (state.customImages && state.customImages[slotKey]) {
+        delete state.customImages[slotKey];
+        removeImageFromDB(slotKey);
+        saveState();
+        render();
+        showAdminSavedToast("↩️ Đã khôi phục ảnh mặc định!");
+      }
+    }
+
+    function updateLongEmail(val) {
+      state.longEmail = val;
+      saveState();
+    }
+
+    function openResetConfirmModal() {
+      const modal = document.getElementById("reset-confirm-modal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeResetConfirmModal() {
+      const modal = document.getElementById("reset-confirm-modal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    async function executeFullReset() {
+      closeResetConfirmModal();
+      await clearAllImagesFromDB();
+      localStorage.removeItem(STORAGE_KEY);
+      state = {
+        ...defaultState,
+        customImages: { ...(PRELOADED.customImages || {}) },
+        longEmail: PRELOADED.longEmail || ""
+      };
+      saveState();
+      render();
+    }
+
+    function renderAdminSlotCard(slotKey, title, subtitle, fallbackUrl) {
+      const curImg = getImage(slotKey, fallbackUrl);
+      const isCustom = Boolean(state.customImages && state.customImages[slotKey]);
+      const isUrlLink = isCustom && /^https?:\/\//i.test(state.customImages[slotKey]);
+      const currentLinkVal = isUrlLink ? state.customImages[slotKey] : "";
+      const safeLinkAttr = currentLinkVal.replace(/"/g, "&quot;");
+
+      return `
+        <div id="admin-slot-${slotKey}" class="p-3 rounded-2xl bg-[#FDF9FA] border border-[#EFE0E5] space-y-2.5 transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-16 h-16 rounded-xl overflow-hidden bg-white border border-[#EED9E0] shrink-0">
+              <img src="${curImg}" alt="${title}" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-extrabold text-[#2D2226] truncate">${title}</div>
+              ${subtitle ? `<div class="text-[10px] text-[#7A686E] truncate">${subtitle}</div>` : ""}
+              <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <label class="px-2.5 py-1 rounded-lg bg-[#E14B75] text-white text-[10px] font-bold cursor-pointer">
+                  📁 Tải ảnh lên
+                  <input type="file" accept="image/*" class="hidden" onchange="handleUploadSlotImage('${slotKey}', this)" />
+                </label>
+                ${
+                  isCustom
+                    ? `<button type="button" onclick="clearSlotImage('${slotKey}')" class="px-2 py-1 rounded-lg bg-white border border-[#E7CFD7] text-[10px] font-bold text-[#7A686E]">
+                        Mặc định
+                      </button>`
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <input
+              type="text"
+              value="${safeLinkAttr}"
+              onchange="updateSlotImageUrl('${slotKey}', this.value)"
+              placeholder="Hoặc dán link URL ảnh (https://...) tại đây"
+              class="flex-1 px-2.5 py-1.5 rounded-lg bg-white border border-[#E7CFD7] text-[10px] text-[#2D2226] focus:outline-none focus:border-[#E14B75]"
+            />
+            <span class="px-2 py-1 rounded-lg bg-[#FCEEF2] text-[#BE3159] text-[9px] font-extrabold shrink-0">
+              🔗 Link
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdminScreen() {
+      const optionGroupsList = [];
+      INTRO_GROUPS.forEach(g =>
+        optionGroupsList.push({
+          groupTitle: `Góc Dạo Đầu • ${g.title}`,
+          items: g.options.map(o => ({ key: o.id, label: o.label, fallback: o.defaultImg }))
+        })
+      );
+      [1, 3, 4, 5, 6, 7].forEach(pNum => {
+        const p = PARTS_DATA[pNum];
+        p.groups.forEach(g =>
+          optionGroupsList.push({
+            groupTitle: `Phần ${pNum} • ${g.title}`,
+            items: g.options.map(o => ({ key: o.id, label: o.label, fallback: o.defaultImg }))
+          })
+        );
+      });
+      optionGroupsList.push({
+        groupTitle: "Phần 2 • Thể loại & Nghệ sĩ Âm nhạc",
+        items: [
+          ...MUSIC_CATALOG.map(g => ({ key: g.id, label: `Thể loại: ${g.name}`, fallback: g.defaultImg })),
+          ...MUSIC_CATALOG.flatMap(g =>
+            g.artists.map(a => ({ key: a.id, label: `Nghệ sĩ: ${a.name} (${g.name})`, fallback: a.defaultImg }))
+          )
+        ]
+      });
+
+      const bannerSlotsList = Object.keys(STAGE_HEADER_BANNERS).map(k => ({
+        key: STAGE_HEADER_BANNERS[k].slotId,
+        label: STAGE_HEADER_BANNERS[k].label,
+        fallback: STAGE_HEADER_BANNERS[k].defaultImg
+      }));
+
+      const q27Groups = [
+        {
+          title: "Nhóm 1 • 9 Sticker Lưng chừng / Suy nghĩ",
+          items: QUESTION_27_STICKERS.filter(s => s.sentiment === "neutral")
+        },
+        {
+          title: "Nhóm 2 • 9 Sticker Từ chối",
+          items: QUESTION_27_STICKERS.filter(s => s.sentiment === "no")
+        },
+        {
+          title: "Nhóm 3 • 9 Sticker Đồng ý",
+          items: QUESTION_27_STICKERS.filter(s => s.sentiment === "yes")
+        }
+      ];
+
+      return `
+        ${renderTopNav()}
+        <main class="flex-1 px-4 py-4 space-y-4 animate-fade-up">
+          <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h2 class="font-serif-title text-2xl font-bold text-[#2D2226]">⚙️ Góc của Long</h2>
+                <p class="text-[11px] text-[#7A686E]">Tải ảnh lên hoặc dán link URL ảnh — bấm Xuất file HTML để đóng gói gửi Thy</p>
+              </div>
+              <button type="button" onclick="saveAndExitAdmin()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E14B75] to-[#C8355E] text-white text-xs font-extrabold shadow-sm">
+                ✓ Lưu & Quay lại
+              </button>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-[#F3FAF6] border border-[#CFEAD9] flex items-center justify-between gap-2.5">
+              <div class="text-[11px] text-[#1E603F] leading-snug">
+                <span class="font-extrabold">📦 Xuất file hoàn chỉnh gửi Thy:</span> Đóng gói toàn bộ ảnh & email vào 1 file HTML duy nhất.
+              </div>
+              <button type="button" onclick="downloadCurrentHtmlFile()" class="shrink-0 px-3 py-2 rounded-xl bg-[#1E603F] text-white text-[11px] font-extrabold shadow-sm">
+                📥 Xuất HTML
+              </button>
+            </div>
+
+            <div id="admin-saved-toast" class="hidden p-2.5 rounded-xl bg-[#F3FAF6] border border-[#CFEAD9] text-[11px] font-bold text-[#1E603F] text-center">
+              ✅ Đã lưu ảnh & thiết lập của Long!
+            </div>
+
+            <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-[#FDF2F5]">
+              <button type="button" onclick="adminTab='stickers'; render();" class="py-2 rounded-xl text-[11px] font-extrabold ${
+                adminTab === "stickers" ? "bg-white text-[#BE3159] shadow-sm" : "text-[#7A686E]"
+              }">
+                Stickers & Meme
+              </button>
+              <button type="button" onclick="adminTab='options'; render();" class="py-2 rounded-xl text-[11px] font-extrabold ${
+                adminTab === "options" ? "bg-white text-[#BE3159] shadow-sm" : "text-[#7A686E]"
+              }">
+                Ảnh Lựa Chọn
+              </button>
+              <button type="button" onclick="adminTab='settings'; render();" class="py-2 rounded-xl text-[11px] font-extrabold ${
+                adminTab === "settings" ? "bg-white text-[#BE3159] shadow-sm" : "text-[#7A686E]"
+              }">
+                Email & Reset
+              </button>
+            </div>
+          </div>
+
+          ${
+            adminTab === "stickers"
+              ? `
+            <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-3">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#BE3159]">1. 10 Stickers Biểu Cảm Chuyển Cảnh & Nhắc Nhở</h3>
+              <div class="space-y-2.5">
+                ${STICKER_SLOTS.map(s => renderAdminSlotCard(s.id, s.label, `Mã ô: ${s.id}`, s.defaultImg)).join("")}
+              </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-3">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#BE3159]">2. Ảnh Meme Theo 5 Mốc Đánh Giá (0% – 100%)</h3>
+              <div class="space-y-2.5">
+                ${RATING_MEME_MILESTONES.map(m =>
+                  renderAdminSlotCard(m.id, m.rangeLabel, m.reply.slice(0, 62) + "...", m.defaultImg)
+                ).join("")}
+              </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-4">
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#BE3159]">3. Bộ 27 Sticker Hộp Quà Bí Mật Dấu ?</h3>
+                <p class="text-[11px] text-[#7A686E] mt-0.5">Chia đều 3 nhóm (9 Lưng chừng • 9 Từ chối • 9 Đồng ý) — tự động bật đúng sticker theo từ khóa Thy nhập</p>
+              </div>
+              ${q27Groups
+                .map(
+                  grp => `
+                <div class="space-y-2 pt-2 border-t border-[#F4E4E9]">
+                  <div class="text-xs font-extrabold text-[#2D2226]">${grp.title}</div>
+                  <div class="space-y-2">
+                    ${grp.items
+                      .map(st =>
+                        renderAdminSlotCard(
+                          st.key,
+                          `${st.label} (${st.badge})`,
+                          `Từ khóa: ${st.keywords.slice(0, 4).join(", ")}...`,
+                          st.defaultImg
+                        )
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          `
+              : adminTab === "options"
+              ? `
+            <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-3">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#BE3159]">Ảnh Bìa Trang Chào & Ảnh Đầu Trang (Dạo Đầu + 7 Phần)</h3>
+              ${renderAdminSlotCard(
+                "welcome_cover",
+                "Ảnh đại diện Trang Chào Mừng (Góc nhỏ dành riêng cho Thy)",
+                "Mã ô: welcome_cover",
+                "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=500&q=80"
+              )}
+              ${bannerSlotsList
+                .map(b => renderAdminSlotCard(b.key, b.label, `Mã ô: ${b.key}`, b.fallback))
+                .join("")}
+            </div>
+
+            <div class="bg-white rounded-3xl p-4 sm:p-5 card-shadow border border-[#F3E1E7] space-y-3">
+              <div>
                 <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#BE3159]">Hộp Quà Bí Mật (Nấc 01 Đĩa Nhạc & Nấc 02 Hộp Quà)</h3>
                 <p class="text-[11px] text-[#7A686E] mt-0.5">2 ảnh này chỉ hiển thị & xoay/bay bổng sau khi Thy click mở từng nấc bài hát</p>
               </div>
