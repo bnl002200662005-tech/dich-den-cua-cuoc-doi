@@ -3107,27 +3107,46 @@
       return lines;
     }
 
-    function sendResultsToLongEmail() {
-      const targetEmail = (state.longEmail || "").trim();
-      const summaryText = buildFullSummaryLines().join("\n");
-      const subject = encodeURIComponent("🌿 [The Bridge] Hành trình Một chút giản đơn — Kết quả của Thy");
-      const body = encodeURIComponent(summaryText);
+    async function sendResultsToLongEmail() {
+  const summaryText = buildFullSummaryLines().join("\n");
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(summaryText).catch(() => {});
-      }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(summaryText).catch(() => {});
+  }
 
-      if (targetEmail) {
-        state.emailSentStatus = `Đã mở ứng dụng gửi thư tới ${targetEmail} và tự động sao chép toàn bộ kết quả vào bộ nhớ tạm!`;
-        saveState();
-        render();
-        window.location.href = `mailto:${encodeURIComponent(targetEmail)}?subject=${subject}&body=${body}`;
-      } else {
-        state.emailSentStatus = "Đã tự động sao chép toàn bộ kết quả của Thy vào bộ nhớ tạm (Long chưa nhập email nhận ở Góc của Long, bạn có thể dán gửi trực tiếp cho anh Long nhé!).";
-        saveState();
-        render();
-      }
+  state.emailSentStatus = "⏳ Đang gửi trọn vẹn tâm tư của Thy tới Long...";
+  saveState();
+  render();
+
+  try {
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({
+        access_key: "3274fe4c-26f8-432f-915c-3111dd59410b",
+        subject: "💌 [The Bridge] Hành trình của Thy — Kết quả vừa được gửi!",
+        from_name: "Hành Trình Của Thy",
+        message: summaryText
+      })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      state.emailSentStatus = "✅ Đã gửi thành công tới Gmail của Long rồi nè! ✨";
+    } else {
+      state.emailSentStatus = "⚠️ Gửi tự động chưa được, Thy bấm nút Sao chép bên dưới gửi giúp Long nha!";
     }
+  } catch (error) {
+    state.emailSentStatus = "⚠️ Lỗi mạng rồi, Thy bấm nút Sao chép bên dưới gửi cho Long nha!";
+  }
+
+  saveState();
+  render();
+}
+
 
     function copyFullSummary() {
       const text = buildFullSummaryLines().join("\n");
